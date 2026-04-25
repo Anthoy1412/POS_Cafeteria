@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Cafetería POS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estética de fondo profesional */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Gradiente oscuro sobre imagen temática */
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
+                        url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Tarjeta con efecto Cristal (Glassmorphism) */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .header-login {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .body-login {
+            padding: 30px;
+        }
+
+        /* Inputs modernos */
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #6F4E37;
+            box-shadow: 0 0 0 0.25rem rgba(111, 78, 55, 0.15);
+        }
+
+        /* Botón estilo Café */
+        .btn-entrar {
+            background-color: #6F4E37; /* Color café */
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        .btn-entrar:hover {
+            background-color: #5d4037;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-8 col-md-5 col-lg-4">
+                
+                <div class="login-card">
+                    <div class="header-login">
+                        <h2 class="fw-bold mb-0">☕ POS Login</h2>
+                        <small class="text-muted">Administración Cafetería</small>
+                    </div>
+
+                    <div class="body-login">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Usuario</label>
+                            <input type="text" id="user" class="form-control" placeholder="Ej: admin">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Contraseña</label>
+                            <input type="password" id="pass" class="form-control" placeholder="••••••••">
+                        </div>
+                        
+                        <button class="btn btn-entrar w-100 shadow-sm" onclick="entrar()">
+                            Ingresar al Sistema
+                        </button>
+                        
+                        <div id="mensaje-error" class="alert alert-danger mt-3 py-2 small text-center" style="display:none; border-radius: 10px;">
+                            ❌ Credenciales incorrectas
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center mt-4 text-white-50 small">
+                    &copy; 2026 Sistema de Gestión Cafetería
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function entrar() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const errorDiv = document.getElementById('mensaje-error');
+
+            if(!user || !pass) return alert("Llena todos los campos");
+
+            try {
+                // He mantenido tu puerto 7183
+                const res = await fetch('https://localhost:7183/api/auth/login', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('usuario', JSON.stringify(data));
+                    window.location.href = 'index.html'; 
+                } else {
+                    errorDiv.style.display = 'block';
+                    // Animación simple de sacudida si falla
+                    const card = document.querySelector('.login-card');
+                    card.style.animation = 'shake 0.4s';
+                    setTimeout(() => card.style.animation = '', 400);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión. Verifica que el servidor (dotnet run) esté activo.");
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</body>
+</html>
